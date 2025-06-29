@@ -1,0 +1,35 @@
+---
+title: "STAT 184 - Final Project"
+format: pdf
+editor: visual
+---
+
+```{r}
+## Style Guide: The Tidyverse Style Guide using styler
+
+# ______________________________________________________________
+
+## Dependencies
+
+```
+
+
+## Introduction
+
+
+## Background Information
+
+
+## Data Summary
+
+
+## EDA
+
+
+## Conclusion
+
+
+## References
+
+
+## Code Appendix
