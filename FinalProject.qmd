@@ -1,35 +1,178 @@
 ---
-title: "STAT 184 - Final Project"
+title: "Exploration of how Trading with the US in Aerospace and Defense Affects Country Factors"
+subtitle: "STAT 184 - Final Project"
+author: Ishan Agrahar
+date: 06/30/2025
 format: pdf
 editor: visual
 ---
 
 ```{r}
-## Style Guide: The Tidyverse Style Guide using styler
+#| include: false
+## Style Guide: The Tidyverse Style Guide using styler for compliance
+## Note: Set your working directory to the STAT-184-Expenditure-Analysis folder
 
 # ______________________________________________________________
 
 ## Dependencies
+library(dplyr)
+library(tidyr)
+library(readr)
+library(rvest)
 
 ```
 
+```{r}
+#| eval: false
+#| include: false
+# ______________________________________________________________
+
+## Scraped Data
+
+### This will scrape the air pollution wikipedia table and save it
+web_page <- "https://en.wikipedia.org/wiki/List_of_countries_by_air_pollution"
+SetOfTables <- web_page %>%
+  read_html() %>%
+  html_nodes(css = "table") %>%
+  html_table(fill = TRUE)
+# 4th table has what I want
+airPollution <- SetOfTables[[4]]
+airPollution <- airPollution %>%
+  rename(
+    rank = Rank,
+    country = `Country/Region`,
+    "Y2018" = `2018`,
+    "Y2019" = `2019`,
+    "Y2020" = `2020`,
+    "Y2021" = `2021`,
+    "Y2022" = `2022`,
+    "Y2023" = `2023`)
+
+# Note this needed because 2023 is a number and I don't want to risk going backwards
+airPollution$Y2018 <- parse_number(airPollution$Y2018)
+airPollution$Y2019 <- parse_number(airPollution$Y2019)
+airPollution$Y2020 <- parse_number(airPollution$Y2020)
+airPollution$Y2021 <- parse_number(airPollution$Y2021)
+airPollution$Y2022 <- parse_number(airPollution$Y2022)
+
+airPollution <- airPollution %>%
+  pivot_longer(
+    cols = starts_with("Y"),
+    names_to = "Year",
+    values_to = "particulateMatter")
+airPollution$Year <- parse_number(airPollution$Year)
+
+# Uncomment below line to save csv
+#write_csv(airPollution, "airPollution.csv")
+
+```
+
+```{r}
+#| include: false
+# ______________________________________________________________
+
+## Datasets
+
+### Loading all datasets from csv files
+# Primary Dataset
+primaryDefenseTrade <- read.csv("data/defense/USDefenseExport.csv") %>%
+  rename(
+    Year = YEAR,
+    valueInUSD = VALUE,
+    country = COUNTRY,
+    item = HS.CODE
+  )
+primaryDefenseTrade$valueInUSD <- parse_number(primaryDefenseTrade$valueInUSD)
+primaryDefenseTrade = primaryDefenseTrade %>%
+  drop_na()
+
+# Research Q1
+yearAppend <- function(datFrame, numYear) {
+  datFrame %>% mutate(Year = numYear)
+}
+
+happinessScore <- read.csv("data/happiness/WHR_2015.csv") %>%
+  yearAppend(2015) %>%
+  select(country, happiness_score, Year)
+
+for (i in 2016:2023) {
+  happinessScore <- happinessScore %>%
+    rbind(
+      yearAppend(
+        read.csv(
+          paste("data/happiness/WHR_", i, ".csv", sep = "")
+        ),
+        numYear = i
+      ) %>%
+        select(country, happiness_score, Year)
+    )
+}
+
+happinessScore <- happinessScore %>%
+  rbind(
+    read.csv("data/happiness/WEB_WHR_2024.csv") %>%
+      yearAppend(2024) %>%
+      rename(happiness_score = HappiestCountriesWorldHappinessReportScore2024) %>%
+      select(country, happiness_score, Year)
+  ) %>%
+  drop_na()
+
+# Research Q2
+gdpPerCountry <- read.csv("data/GDPUSD/GDPinUSD.csv")
+
+gdpPerCountry$X2024 <- NULL # This one and the below col are just NA
+gdpPerCountry$X <- NULL
+gdpPerCountry$Indicator.Code <- NULL # Below are the same vals or unneeded
+gdpPerCountry$Indicator.Name <- NULL
+gdpPerCountry$Country.Code <- NULL
+
+gdpPerCountry <- gdpPerCountry %>%
+  pivot_longer(
+    cols = starts_with("X"),
+    names_to = "Year",
+    values_to = "GDP(USD)"
+  ) %>%
+  rename(country=Country.Name) %>%
+  drop_na()
+gdpPerCountry$Year <- parse_number(gdpPerCountry$Year)
+
+# Research Q3
+populationPerCountry <- read.csv("data/Population/PopulationData.csv")
+
+populationPerCountry$X2024 <- NULL # This one and the below col are just NA
+populationPerCountry$X <- NULL
+populationPerCountry$Indicator.Code <- NULL # Below are the same vals or unneeded
+populationPerCountry$Indicator.Name <- NULL
+populationPerCountry$Country.Code <- NULL
+
+populationPerCountry <- populationPerCountry %>%
+  pivot_longer(
+    cols = starts_with("X"),
+    names_to = "Year",
+    values_to = "Population"
+  ) %>%
+  rename(country=Country.Name) %>%
+  drop_na()
+populationPerCountry$Year <- parse_number(populationPerCountry$Year)
+
+# Research Q4
+airPollutionPerCountry <- read.csv("data/Airpollution/airPollution.csv") %>%
+  select(country,particulateMatter,Year) %>%
+  drop_na()
+```
 
 ## Introduction
 
-
 ## Background Information
-
 
 ## Data Summary
 
-
 ## EDA
-
 
 ## Conclusion
 
-
 ## References
 
-
 ## Code Appendix
+```{r codeAppendix, ref.label = knitr::all_labels(),echo=TRUE,eval=FALSE}
+```

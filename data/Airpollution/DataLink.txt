@@ -1,1 +1,3 @@
 Data Scraped from https://en.wikipedia.org/wiki/List_of_countries_by_air_pollution
+
+Note that the wikipedia page states that the data is from IQAir 2023 World Air Quality Ranking
