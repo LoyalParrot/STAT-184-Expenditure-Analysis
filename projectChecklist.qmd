@@ -1,7 +1,7 @@
 ---
 title: "Project Checklist"
 subtitle: STAT 184 Course Project
-author: Your Name Here
+author: Ishan Agrahar
 date: 30 June 2025
 date-format: DD MMMM YYYY
 toc: true
