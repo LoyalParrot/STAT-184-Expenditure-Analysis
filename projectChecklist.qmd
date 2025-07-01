@@ -35,19 +35,19 @@ C. QMD line number for due date: 5
 
 **Make sure you review the requirements on Canvas. This is not a complete checklist.**
 
-- [ ] Set a table of contents.
+- [x] Set a table of contents.
 
-- [ ] Use a consistent Style Guide.
+- [x] Use a consistent Style Guide.
 
-- [ ] Identify and use at least 3 data sets/sources.
+- [x] Identify and use at least 3 data sets/sources.
 
-- [ ] Include all required parts of the report (e.g., Introduction, etc.).
+- [x] Include all required parts of the report (e.g., Introduction, etc.).
 
-- [ ] Caption all figures and use **cross references** within your Quarto document.
+- [x] Caption all figures and use **cross references** within your Quarto document.
 
-- [ ] Put all code in the Code Appendix.
+- [x] Put all code in the Code Appendix.
 
-- [ ] Cite your sources. (Origin of your data, any websites you used, etc.)
+- [x] Cite your sources. (Origin of your data, any websites you used, etc.)
 
 # Line Numbers for Required Components
 
@@ -59,36 +59,36 @@ A. QMD line numbers where at least 3 data sources are imported:
 
 **DO AT LEAST FOUR OF THE FOLLOWING:**
 
-A. QMD line number(s) for general data wrangling:
+A. QMD line number(s) for general data wrangling: 335, 441
 
-B. QMD line number(s) for a join operation: 
+B. QMD line number(s) for a join operation: 415, 442, 470, 497
 
-C. QMD line number(s) for `pivot_wider` or `pivot_longer` operation (or equivalent):
+C. QMD line number(s) for `pivot_wider` or `pivot_longer` operation (or equivalent): 64, 136, 155
 
-D. QMD line number(s) for use of regular expressions:
+D. QMD line number(s) for use of regular expressions: No
 
-E. QMD line number(s) for use of reduction and/or transformation functions:
+E. QMD line number(s) for use of reduction and/or transformation functions: 337, 354, 413
 
-F. QMD line number(s) for use of user-defined functions:
+F. QMD line number(s) for use of user-defined functions: 96
 
-G. QMD line number(s) for use of loops and/or control flow:
+G. QMD line number(s) for use of loops and/or control flow: 104
 
 ## Data Visualization
 
 **Include the line numbers where you are plotting relevant graphs or shapes, YOU DO NOT have to use all of the following:**
 
-A. QMD line number(s) for **all data visualizations**:
+A. QMD line number(s) for **all data visualizations**: 366, 387, 417, 445, 472, 499
 
-B. QMD line number(s) for multiple different geoms:
+B. QMD line number(s) for multiple different geoms: 366, 445
 
-C. QMD line number(s) for use of multiple asthetics:
+C. QMD line number(s) for use of multiple asthetics: 472
 
-D. QMD line number(s) for use of layered graphics:
+D. QMD line number(s) for use of layered graphics: All technically?
 
-E. QMD line number(s) for use of leaflet or choropleth maps:
+E. QMD line number(s) for use of leaflet or choropleth maps: No
 
 ## Tables
 
-A. Include QMD line numbers for **all tables**: 
+A. Include QMD line numbers for **all tables**: 230, 251, 272, 293, 314, 339, 356
 
 
