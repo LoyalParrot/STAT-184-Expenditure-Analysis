@@ -1,11 +1,14 @@
 ---
-title: "Exploration of how Trading with the US in Aerospace and Defense Affects Country Factors"
+title: "Exploration of How Trading with the US in Aerospace and Defense Affects Country Factors"
 subtitle: "STAT 184 - Final Project"
 author: Ishan Agrahar
 date: 06/30/2025
 format: pdf
+toc: true
 editor: visual
 ---
+
+\newpage
 
 ```{r}
 #| include: false
@@ -19,6 +22,8 @@ library(dplyr)
 library(tidyr)
 library(readr)
 library(rvest)
+library(knitr)
+library(ggplot2)
 
 ```
 
@@ -85,6 +90,7 @@ primaryDefenseTrade <- read.csv("data/defense/USDefenseExport.csv") %>%
 primaryDefenseTrade$valueInUSD <- parse_number(primaryDefenseTrade$valueInUSD)
 primaryDefenseTrade = primaryDefenseTrade %>%
   drop_na()
+primaryDefenseTrade$Year = as.numeric(primaryDefenseTrade$Year)
 
 # Research Q1
 yearAppend <- function(datFrame, numYear) {
@@ -159,20 +165,379 @@ populationPerCountry$Year <- parse_number(populationPerCountry$Year)
 airPollutionPerCountry <- read.csv("data/Airpollution/airPollution.csv") %>%
   select(country,particulateMatter,Year) %>%
   drop_na()
+
 ```
 
 ## Introduction
 
+The United States is the world leader in Defense Spending and it is therefore natural that they have a lot of activity with regards to exporting Defensive Technology to other Countries. This report is going to analyze the exports of Aerospace Defense Technology by the US on a year-by-year basis, and attempt to find if a correlation exists between some factors as specified by the below research questions.
+
+To guide analysis, this report will aim to answer the four following research questions.
+
+1.  If a country spends more money importing US Aerospace Defense, does that correlate to an increase in Happiness?
+2.  How much of a countries GDP is allocated towards importing US Aerospace Defense?
+3.  How does population impact how much a country spends on importing US Aerospace Defense?
+4.  Is a country's air pollution score impacted by importing US Aerospace Defense?
+
+These questions are interesting because in modern times we are seeing a push for defense spending to increase (i.e the US pushing for higher NATO defense spending). As a world leader and influential country it is interesting to see if there is a correlation between US Aerospace Defense and metrics of daily life that speaks to that influence.
+
+Note: Correlation does not imply Causation. Therefore if by chance there is a correlation found we can only speculate causation and further research would be needed to find if Causation exists which is outside the scope of this report.
+
+\newpage
 ## Background Information
+
+From the research questions, it is clear that we are comparing multiple metrics to a country's spending on importing US Aerospace Defense. Therefore the best way to answer the research questions is to find data which (1) shows the importing figures for US Aerospace Defense by Country and Year, and (2) represents the metric as specified by each question. Therefore we can further summarize the research questions according to a primary dataset and a corresponding metric dataset.
+
+The metric of the primary dataset shall be: US Aerospace Defense Exports per Year
+
+The corresponding metric of the metric datasets correspond to the above research questions and are as follows:
+
+1.  Country Happiness Score per Year
+2.  Country GDP per Year
+3.  Country Population per Year
+4.  Air Pollution per Year
+
+Note that analysis must be done for the years 2015-2024 because those are the years available in the primary dataset.
+
+To answer the research questions, this report will use the powerful tool of visualization where I essentially will take the primary dataset metric of US Aerospace Defense Exports by Country and do a year-by-year comparison against the corresponding metric for some countries and years using scatterplots and line graphs.
+
+Note that I will further specify the countries that are going to be used in analysis because there is a total of fourteen countries reported in the primary dataset.
+\newpage
 
 ## Data Summary
 
+### Primary Dataset Provenance and Attributes - US Aerospace Defense Exports
+
+**Where did the data come from**: The data comes from the Official Website of the United States International Trade Administration^[Data collected by the US International Trade Administration located at https://www.trade.gov/data-visualization/aerospace-and-defense-data]
+
+**What purpose did they collect the data**: According to the International Trade Administration, they collect data for the purpose of promoting trade and investment, strengthening the competitiveness of U.S. industry, and ensuring fair trade and compliance with trade laws and agreements.
+
+**What are the cases**: The cases are the amount of money a specific country imported for an item of US Aerospace Defense Technology in a specific year.
+
+**Interesting Attributes**: We will use the Country, Year, and Value in USD.
+
+The below table is the top three entries of the cleaned dataset to signify a sample data entry.
+
+```{r}
+#| echo: false
+# ______________________________________________________________
+
+## Data Summary
+
+# Primary Dataset Provenance and Attributes - US Aerospace Defense Exports
+primaryDefenseTrade %>%
+  head(3) %>%
+  kable()
+
+```
+
+### Metric Dataset Provenance and Attributes - Country Happiness Score
+
+**Where did the data come from**: The data comes from the World Happiness Report where the files are downloaded from Kaggle for 2015 to 2023^[From Kaggle via Sazidul Islam: https://www.kaggle.com/datasets/sazidthe1/global-happiness-scores-and-factors] and directly from the World Happiness Report for 2024^[World Happiness Report: https://worldpopulationreview.com/country-rankings/happiest-countries-in-the-world].
+
+**What purpose did they collect the data**: According to the World Happiness Report: By making the essential insights from wellbeing science accessible to all, we give everyone the knowledge to create more happiness for themselves and others.
+
+**What are the cases**: Each case is the happiness of a country in a year.
+
+**Interesting Attributes**: We are interested in country, happiness_score, and year.
+
+The below table is the top three entries of the cleaned dataset to signify a sample data entry.
+
+```{r}
+#| echo: false
+# Metric Dataset Provenance and Attributes - Country Happiness Score
+happinessScore %>%
+  head(3) %>%
+  kable(caption = "Sample Data Entries")
+
+```
+
+### Metric Dataset Provenance and Attributes - Country GDP
+
+**Where did the data come from**: The data comes from the World Bank Group^[World Bank Group: https://data.worldbank.org/indicator/NY.GDP.MKTP.CD].
+
+**What purpose did they collect the data**: According to the World Bank Group: Timely and reliable statistics are key inputs to the broad development strategy. Improvements in the quality and quantity of data on all aspects of development are essential if we are to achieve the goal of a world without poverty.
+
+**What are the cases**: The cases are a country's GDP in a certain year.
+
+**Interesting Attributes**: We are interested in Country, Year, and GDP in US Dollar.
+
+The below table is the top three entries of the cleaned dataset to signify a sample data entry.
+
+```{r}
+#| echo: false
+# Metric Dataset Provenance and Attributes - Country GDP
+gdpPerCountry %>%
+  head(3) %>%
+  kable(caption = "Sample Data Entries")
+
+```
+
+### Metric Dataset Provenance and Attributes - Country Population
+
+**Where did the data come from**: The data comes from the World Bank Group^[World Bank Group: https://data.worldbank.org/indicator/SP.POP.TOTL].
+
+**What purpose did they collect the data**: According to the World Bank Group: Timely and reliable statistics are key inputs to the broad development strategy. Improvements in the quality and quantity of data on all aspects of development are essential if we are to achieve the goal of a world without poverty.
+
+**What are the cases**: The cases are a countries population in a certain year.
+
+**Interesting Attributes**: We are interested in country, year, and population.
+
+The below table is the top three entries of the cleaned dataset to signify a sample data entry.
+
+```{r}
+#| echo: false
+# Metric Dataset Provenance and Attributes - Country Population
+populationPerCountry %>%
+  head(3) %>%
+  kable(caption = "Sample Data Entries")
+
+```
+
+### Metric Dataset Provenance and Attributes - Air Pollution
+
+**Where did the data come from**: The data is scraped from Wikipedia^[Air Pollution Wikipedia: https://en.wikipedia.org/wiki/List_of_countries_by_air_pollution] where they got the table from IQAir 2023 World Air Quality Ranking.
+
+**What purpose did they collect the data**: According to IQAir, they collect data to empower communities to monitor air quality and support clean air initiatives worldwide^[IQAir: https://www.iqair.com/about-iqair]
+
+**What are the cases**: The cases are a countries particulate matter amount in a year.
+
+**Interesting Attributes**: We are interested in country, particulate matter, and year.
+
+The below table is the top three entries of the cleaned dataset to signify a sample data entry.
+
+```{r}
+#| echo: false
+# Metric Dataset Provenance and Attributes - Air Pollution
+airPollutionPerCountry %>%
+  head(3) %>%
+  kable(caption = "Sample Data Entries")
+
+```
+\newpage
+
 ## EDA
 
+### Primary Analysis - Countries
+
+The first step I will take to answer the research questions is to explore the primary dataset in attempt to gain more insight of what I can state.
+
+Therefore the first thing I will do is attempt to see what countries are represented by the data. This is exemplified by the below table.
+
+```{r}
+#| label: fig-t1
+#| fig-cap: "Table of a Country vs. Amount they spent importing US Aerospace Defense Technology"
+#| echo: false
+# ______________________________________________________________
+
+## Exploratory Data Analysis
+# Country vs. Amount they spent importing US Aerospace Defense Technology
+primaryDefenseTrade %>%
+  group_by(country) %>%
+  summarize(TotalSpending = sum(valueInUSD)) %>%
+  arrange(desc(TotalSpending)) %>%
+  kable(caption = "Table of a Country vs. Amount they spent importing US Aerospace Defense Technology")
+
+```
+
+Looking at @fig-t1 it is therefore found that only fourteen countries are represented in the primary dataset and therefore in moving forth all following datasets must adhere to analyzing those countries only.
+
+### Primary Analysis - Yearly Distribution
+
+The next thing I will do is take a look at the summarized spending of the data to try and get an idea of how the data is distributed yearly.
+
+```{r}
+#| echo: false
+# Aerospace Defense Exported by US each Year 2015-2024
+spreadD <- primaryDefenseTrade %>%
+  group_by(Year) %>%
+  summarize(totalSpent = sum(valueInUSD))
+
+spreadD %>% kable(caption = "Aerospace Defense Exported by US each Year 2015-2024")
+```
+
+
+
+```{r}
+#| label: fig-g1
+#| fig-cap: "Yearly Distribution of Trade"
+#| echo: false
+
+ggplot(data = spreadD, aes(x = Year, y = totalSpent)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Aerospace Defense Exported by US each Year 2015-2024")
+
+```
+
+As can be seen by @fig-g1 it seemingly increases till 2018 and then trade goes down likely due to COVID, and then picks back up heavily after 2021. This trend may be useful when we try to answer the research questions.
+
+Lastly I will look at how different countries spent money over the years.
+\newpage
+```{r}
+#| label: fig-g2
+#| echo: false
+#| fig-cap: "Yearly Distribution of Trade by Country"
+# Yearly Distribution of Trade by Country
+
+spreadD <- primaryDefenseTrade %>%
+  group_by(Year, country) %>%
+  summarize(totalSpent = sum(valueInUSD), .groups = "drop")
+
+ggplot(data = spreadD, aes(x = Year, y = totalSpent)) +
+  geom_line() +
+  aes(colour = country) +
+  theme(legend.position = "right") +
+  labs(title = "Aerospace Defense Exported by US each Year 2015-2024 by Country")
+
+```
+
+As can be seen in @fig-g2 there is a variety of spending across the years where Saudi Arabia seems to be the highest spending across most years with Ukraine being the lowest.
+
+The next part of data analysis will focus on the primary dataset against the metric datasets for the research questions.
+
+### Research Question 1
+
+This section aims to answer the research question: If a country spends more money importing US Aerospace Defense, does that correlate to an increase in Happiness?
+
+To do this I will make a visualization of happiness score versus value exported from the US Aerospace Defense to that country to see if there is a visible correlation. At this point it is more convient to look at the sum of spending per year so I will now remove the specific items from each year/country and just have the cases for the primary dataset be the amount a country spent in importing US Aerospace Defense Technology in a year.
+\newpage
+```{r}
+#| label: fig-g3
+#| echo: false
+#| warning: false
+#| fig-cap: "Happiness vs. Value"
+# Research Q1
+primaryDefenseTrade <- primaryDefenseTrade %>%
+  group_by(country, Year) %>%
+  summarize(TotalValue = sum(valueInUSD), .groups = "drop")
+
+rq1 <- primaryDefenseTrade %>% left_join(happinessScore, by = join_by(Year, country))
+
+ggplot(data = rq1, aes(x = happiness_score, y = TotalValue)) +
+  geom_line() +
+  aes(colour = country) +
+  facet_wrap(~country, ncol = 4) +
+  theme(legend.position = "right") +
+  labs(title = "Happiness vs. Value Exported from US Aerospace Defense per Country")
+
+```
+
+As seen in @fig-g3 there unfortunately does not seem to be a general correlation to trading with the US and happiness, note that some countries like Saudi Arabia and Canada seem to be be happier when there is less trade and opposite for Mexico, but there is mixed results elsewhere.
+
+### Research Question 2
+
+This section aims to answer the research question: How much of a countries GDP is allocated towards importing US Aerospace Defense?
+
+To do this I will display a ratio where I take the countries value spent on aerospace trade and divide that by the countries total GDP.
+
+\newpage
+```{r}
+#| label: fig-g4
+#| echo: false
+#| warning: false
+#| fig-cap: "Proportion of GDP spent on importing US Aerospace Defense"
+# Research Q2
+rq2 <- primaryDefenseTrade %>%
+  inner_join(gdpPerCountry, by = join_by(country, Year)) %>%
+  mutate(ProportionSpent = TotalValue / `GDP(USD)`)
+
+ggplot(data = rq2, aes(x = Year, y = ProportionSpent)) +
+  geom_line() +
+  geom_point() +
+  aes(colour = country) +
+  theme(legend.position = "right") +
+  labs(title = "Proportion of GDP spent on importing US Aerospace Defense by Country")
+
+```
+
+Looking at @fig-g4 it seems that the trend roughly seems to follow the total spent by country per year analysis that was done in Primary Analysis. As can be seen Saudi Arabia has the top trading proportion of GDP till 2021 where Israel led in 2021 and then Singapore in 2022 and 2023. This is stunning because Saudia Arabia continued to have the highest total spent by country per year as noted in @fig-g2. Ukraine, as expected from total spent by country per year, is the lowest in proportion.
+
+### Research Question 3
+
+This section aims to answer the research question: How does population impact how much a country spends on importing US Aerospace Defense?
+
+To answer this question I will make a graph across the years of population and then put the value spent on imports in size so we can see if there is a relationship with year too.
+
+\newpage
+```{r}
+#| label: fig-g5
+#| echo: false
+#| warning: false
+#| fig-cap: "Population Across Years"
+# Research Q3
+rq3 <- primaryDefenseTrade %>%
+  inner_join(populationPerCountry, by = join_by(country, Year))
+
+ggplot(data = rq3, aes(x = Year, y = Population)) +
+  geom_point() +
+  aes(colour = country) +
+  aes(size = TotalValue) +
+  theme(legend.position = "right") +
+  labs(title = "Population Across the Years for Countries and Total Import of US Aerospace Defense")
+
+```
+
+From @fig-g5, there unfortunately is not a general trend and most countries look like there is no correlation but there may be a trend with Israel and Brazil for example where as population increases over the years, defense decreases.
+
+### Research Question 4
+
+This section aims to answer the research question: Is a country's air pollution score impacted by importing US Aerospace Defense?
+
+To do this a line graph of the particulate matter (how bad the air is) versus the total value of imports for each country should be sufficient to see if there is a correlation.
+
+\newpage
+```{r}
+#| label: fig-g6
+#| echo: false
+#| warning: false
+#| fig-cap: "Particulate Matter vs. Total Value Import by Country"
+# Research Q4
+rq4 <- primaryDefenseTrade %>%
+  inner_join(airPollutionPerCountry, by = join_by(country, Year))
+
+ggplot(data = rq4, aes(x = particulateMatter, y = TotalValue)) +
+  geom_line() +
+  aes(colour = country) +
+  theme(legend.position = "right") +
+  labs(title = "Particulate Matter vs. Total Value Spent on US Aerospace Defense Import")
+```
+
+Looking at @fig-g6 there does not really seem to be a correlation at all between trading US Aerospace Defense and particulate matter so I unfortunately must conclude for this question that there is not a trend at current scale for this metric.
+
+\newpage
 ## Conclusion
 
+To first remind of what the research questions that guide this report see below
+
+1.  If a country spends more money importing US Aerospace Defense, does that correlate to an increase in Happiness?
+2.  How much of a countries GDP is allocated towards importing US Aerospace Defense?
+3.  How does population impact how much a country spends on importing US Aerospace Defense?
+4.  Is a country's air pollution score impacted by importing US Aerospace Defense?
+
+Through the powerful tool of visualization I have explored the trends in the data at a country basis to see if there are trends in the above metrics compared to my primary dataset of importing US Aerospace Defense. To conclude I will summarize what was ascertained in each visualization. For the first question I found that there was not a general trend but for some countries there did seem to be a correlation where if a country spends more money importing US Aerospace Defense it does that correlate to an increase in Happiness; as well as the opposite of that trend. For the second question I found that the proportion of a countries GDP had parallels to the amount that they spent in terms of ranking of countries and suprisingly that Saudi Arabia's proportion went down while they still had the highest total spending indicating that their economy must've greatly increased. In the third question I found that there was not a general trend but for some countries there may be a correlation which could be explored more on a country-by-country basis. Note that a general trend was not discovered for any research question except for the Question 4 where I state with a good amount of confidence that, based on current data, a country's air pollution score is not impacted by importing US Aerospace Defense.
+
+Cumulatively looking at the questions as a whole, it would be at a better benefit to look at the data from a country per country basis as my generalization hurt my ability to find trends and geographically there are going to be differences.
+
+\newpage
 ## References
 
+“Aerospace and Defense Data.” *International Trade Administration | Trade.Gov*, www.trade.gov/data-visualization/aerospace-and-defense-data. Accessed 30 June 2025. 
+
+“First in Air Quality.” *IQAir*, www.iqair.com/about-iqair. Accessed 30 June 2025. 
+
+“GDP (Current US$).” *World Bank Open Data*, data.worldbank.org/indicator/NY.GDP.MKTP.CD. Accessed 30 June 2025. 
+
+“Happiest Countries in the World 2025.” *Worldpopulationreview.Com*, worldpopulationreview.com/country-rankings/happiest-countries-in-the-world. Accessed 30 June 2025. 
+
+Islam, Sazidul. “World Happiness Report (till 2023).” *Kaggle*, 9 Sept. 2023, www.kaggle.com/datasets/sazidthe1/global-happiness-scores-and-factors. 
+
+“List of Countries by Air Pollution.” *Wikipedia*, Wikimedia Foundation, 21 May 2025, en.wikipedia.org/wiki/List_of_countries_by_air_pollution. 
+
+“Population, Total.” *World Bank Open Data*, data.worldbank.org/indicator/SP.POP.TOTL. Accessed 30 June 2025.
+
+\newpage
 ## Code Appendix
+
 ```{r codeAppendix, ref.label = knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
